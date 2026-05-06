@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      # Прокидаємо скрипт ініціалізації
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      # Прокидаємо CSV файл у дозволену папку
+      - ./titanic.csv:/var/lib/mysql-files/titanic.csv
+    # Дозволяємо LOAD DATA з цієї папки
+    command: --secure-file-priv=/var/lib/mysql-files
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
